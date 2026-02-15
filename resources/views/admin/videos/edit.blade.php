@@ -39,6 +39,16 @@
         </div>
 
         <div class="mb-4">
+            <label for="subtitle_file" class="block text-sm font-medium text-gray-700 mb-1">Subtitles</label>
+            @if($video->subtitles)
+                <p class="text-xs text-gray-500 mb-1">Current: {{ basename($video->subtitles) }}</p>
+            @endif
+            <input type="file" name="subtitle_file" id="subtitle_file" accept=".vtt,.srt"
+                   class="w-full text-sm">
+            @error('subtitle_file') <p class="text-red-600 text-xs mt-1">{{ $message }}</p> @enderror
+        </div>
+
+        <div class="mb-4">
             <label for="thumbnail" class="block text-sm font-medium text-gray-700 mb-1">Replace Thumbnail</label>
             <input type="file" name="thumbnail" id="thumbnail" accept="image/*"
                    class="w-full text-sm">

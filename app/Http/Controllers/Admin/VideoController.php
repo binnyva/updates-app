@@ -34,10 +34,12 @@ class VideoController extends Controller
             'time_period' => 'required|string|max:255',
             'content' => 'nullable|string',
             'level' => 'required|in:full,limited',
-            'upload_type' => 'required|in:file,url',
+            'upload_type' => 'required|in:file,url,server',
             'video_file' => 'required_if:upload_type,file|file|mimetypes:video/*|max:512000',
             'video_url' => 'required_if:upload_type,url|nullable|url',
+            'server_file' => 'required_if:upload_type,server|nullable|string',
             'thumbnail' => 'nullable|image|max:2048',
+            'subtitle_file' => 'nullable|file|max:5120',
         ]);
 
         $user = $this->currentUser();
@@ -59,6 +61,18 @@ class VideoController extends Controller
         if ($validated['upload_type'] === 'file' && $request->hasFile('video_file')) {
             $videoPath = $request->file('video_file')->store('videos', 'local');
             $videoData['video_url'] = $videoPath;
+        } elseif ($validated['upload_type'] === 'server' && !empty($validated['server_file'])) {
+            $serverFile = 'videos/' . $validated['server_file'];
+            if (!Storage::disk('local')->exists($serverFile)) {
+                return back()->withErrors(['server_file' => 'The selected file does not exist on the server.'])->withInput();
+            }
+            $videoData['video_url'] = $serverFile;
+        }
+
+        // Handle subtitle file
+        if ($request->hasFile('subtitle_file')) {
+            $subtitlePath = $request->file('subtitle_file')->store('subtitles', 'local');
+            $videoData['subtitles'] = $subtitlePath;
         }
 
         $video = Video::create($videoData);
@@ -69,6 +83,19 @@ class VideoController extends Controller
         }
 
         return redirect('/adm/videos')->with('success', 'Video created successfully.');
+    }
+
+    public function serverFiles()
+    {
+        $allFiles = Storage::disk('local')->files('videos');
+        $usedFiles = Video::whereNotNull('video_url')->pluck('video_url')->toArray();
+
+        $availableFiles = collect($allFiles)
+            ->filter(fn ($file) => !in_array($file, $usedFiles))
+            ->map(fn ($file) => basename($file))
+            ->values();
+
+        return response()->json($availableFiles);
     }
 
     public function edit(Video $video)
@@ -92,7 +119,15 @@ class VideoController extends Controller
             'content' => 'nullable|string',
             'level' => 'required|in:full,limited',
             'thumbnail' => 'nullable|image|max:2048',
+            'subtitle_file' => 'nullable|file|max:5120',
         ]);
+
+        if ($request->hasFile('subtitle_file')) {
+            if ($video->subtitles) {
+                Storage::disk('local')->delete($video->subtitles);
+            }
+            $validated['subtitles'] = $request->file('subtitle_file')->store('subtitles', 'local');
+        }
 
         if ($request->hasFile('thumbnail')) {
             if ($video->thumbnail_url) {
@@ -117,6 +152,9 @@ class VideoController extends Controller
         }
         if ($video->thumbnail_url) {
             Storage::disk('public')->delete($video->thumbnail_url);
+        }
+        if ($video->subtitles) {
+            Storage::disk('local')->delete($video->subtitles);
         }
 
         $video->delete();

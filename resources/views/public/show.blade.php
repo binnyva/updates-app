@@ -18,7 +18,10 @@
                        @pause="onPause"
                        @play="onPlay"
                        @timeupdate="onTimeUpdate">
-                    <source src="/video/{{ $video->id }}/stream" type="video/mp4">
+                    <source src="{{ url('/video/' . $video->id . '/stream') }}" type="video/mp4">
+                    @if($video->subtitles)
+                        <track src="{{ url('/video/' . $video->id . '/subtitles') }}" kind="subtitles" srclang="en" label="English" default>
+                    @endif
                     Your browser does not support the video tag.
                 </video>
             </div>

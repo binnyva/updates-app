@@ -12,6 +12,7 @@ class Video extends Model
         'name',
         'time_period',
         'video_url',
+        'subtitles',
         'thumbnail_url',
         'user_id',
         'content',

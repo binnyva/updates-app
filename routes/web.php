@@ -32,6 +32,7 @@ Route::middleware('auth.any')->group(function () {
     Route::post('/update/{video}/comment', [UpdateController::class, 'storeComment']);
     Route::post('/update/{video}/view', [UpdateController::class, 'trackView']);
     Route::get('/video/{video}/stream', [VideoStreamController::class, 'stream']);
+    Route::get('/video/{video}/subtitles', [VideoStreamController::class, 'subtitles']);
 });
 
 // Admin routes (users only)
@@ -42,5 +43,6 @@ Route::prefix('adm')->middleware(['auth.user'])->group(function () {
     Route::resource('users', UserController::class)->middleware('auth.superadmin');
 
     Route::resource('viewers', ViewerController::class);
+    Route::get('videos/server-files', [AdminVideoController::class, 'serverFiles']);
     Route::resource('videos', AdminVideoController::class);
 });

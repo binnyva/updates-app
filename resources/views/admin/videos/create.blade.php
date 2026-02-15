@@ -5,7 +5,8 @@
 
     <form method="POST" action="{{ url('/adm/videos') }}" enctype="multipart/form-data"
           class="bg-white rounded-lg shadow p-6 max-w-lg"
-          x-data="{ uploadType: '{{ old('upload_type', 'file') }}' }">
+          x-data="{ uploadType: '{{ old('upload_type', 'file') }}', serverFiles: [], serverFilesLoaded: false }"
+          x-effect="if (uploadType === 'server' && !serverFilesLoaded) { serverFilesLoaded = true; fetch('{{ url('/adm/videos/server-files') }}').then(r => r.json()).then(data => serverFiles = data) }">
         @csrf
         <div class="mb-4">
             <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Name</label>
@@ -45,6 +46,9 @@
                 <label class="flex items-center gap-1">
                     <input type="radio" name="upload_type" value="url" x-model="uploadType"> <span class="text-sm">URL</span>
                 </label>
+                <label class="flex items-center gap-1">
+                    <input type="radio" name="upload_type" value="server" x-model="uploadType"> <span class="text-sm">Server File</span>
+                </label>
             </div>
         </div>
 
@@ -61,6 +65,28 @@
                    placeholder="https://example.com/video.mp4"
                    class="w-full border border-gray-300 rounded px-3 py-2 text-sm">
             @error('video_url') <p class="text-red-600 text-xs mt-1">{{ $message }}</p> @enderror
+        </div>
+
+        <div class="mb-4" x-show="uploadType === 'server'">
+            <label for="server_file" class="block text-sm font-medium text-gray-700 mb-1">Server File</label>
+            <p class="text-xs text-gray-500 mb-2">Upload your video via FTP to <code class="bg-gray-100 px-1 rounded">storage/app/private/videos/</code> first, then select it here.</p>
+            <select name="server_file" id="server_file"
+                    class="w-full border border-gray-300 rounded px-3 py-2 text-sm">
+                <template x-if="serverFiles.length === 0">
+                    <option value="">No files available</option>
+                </template>
+                <template x-for="file in serverFiles" :key="file">
+                    <option :value="file" x-text="file"></option>
+                </template>
+            </select>
+            @error('server_file') <p class="text-red-600 text-xs mt-1">{{ $message }}</p> @enderror
+        </div>
+
+        <div class="mb-4">
+            <label for="subtitle_file" class="block text-sm font-medium text-gray-700 mb-1">Subtitles (optional)</label>
+            <input type="file" name="subtitle_file" id="subtitle_file" accept=".vtt,.srt"
+                   class="w-full text-sm">
+            @error('subtitle_file') <p class="text-red-600 text-xs mt-1">{{ $message }}</p> @enderror
         </div>
 
         <div class="mb-4">
