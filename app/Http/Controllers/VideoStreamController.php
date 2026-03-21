@@ -19,7 +19,38 @@ class VideoStreamController extends Controller
             abort(404, 'Video file not found.');
         }
 
-        return response()->file($path);
+        $size = filesize($path);
+        $start = 0;
+        $end = $size - 1;
+        $status = 200;
+        $headers = [
+            'Content-Type'   => 'video/mp4',
+            'Accept-Ranges'  => 'bytes',
+            'Content-Length' => $size,
+        ];
+
+        if (request()->hasHeader('Range')) {
+            preg_match('/bytes=(\d+)-(\d*)/', request()->header('Range'), $matches);
+            $start = (int) $matches[1];
+            $end   = isset($matches[2]) && $matches[2] !== '' ? (int) $matches[2] : $size - 1;
+            $length = $end - $start + 1;
+            $status = 206;
+            $headers['Content-Range']  = "bytes {$start}-{$end}/{$size}";
+            $headers['Content-Length'] = $length;
+        }
+
+        return response()->stream(function () use ($path, $start, $end) {
+            $fp = fopen($path, 'rb');
+            fseek($fp, $start);
+            $remaining = $end - $start + 1;
+            while ($remaining > 0 && !feof($fp)) {
+                $chunk = fread($fp, min(8192, $remaining));
+                echo $chunk;
+                $remaining -= strlen($chunk);
+                flush();
+            }
+            fclose($fp);
+        }, $status, $headers);
     }
 
     public function subtitles(Video $video)
