@@ -13,7 +13,8 @@
         @if($video->video_url)
             <div class="bg-black rounded-lg overflow-hidden mb-6">
                 <video x-ref="videoEl"
-                       class="w-full"
+                       class="mx-auto w-auto max-w-full"
+                       style="max-height: 80vh;"
                        controls
                        @pause="onPause"
                        @play="onPlay"
