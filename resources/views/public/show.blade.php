@@ -21,7 +21,10 @@
                        @timeupdate="onTimeUpdate">
                     <source src="{{ url('/video/' . $video->id . '/stream') }}" type="video/mp4">
                     @if($video->subtitles)
-                        <track src="{{ url('/video/' . $video->id . '/subtitles') }}" kind="subtitles" srclang="en" label="English" default>
+                        <track src="{{ url('/video/' . $video->id . '/subtitles') }}" kind="subtitles" srclang="en" label="English" default
+                               x-init="$el.addEventListener('load', () => {
+                                   Array.from($el.track.cues || []).forEach(cue => { cue.line = -4; });
+                               })">
                     @endif
                     Your browser does not support the video tag.
                 </video>
