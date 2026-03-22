@@ -18,6 +18,8 @@ class EnsureAuthenticated
             return redirect('/adm/login');
         }
 
+        session(['url.intended' => $request->fullUrl()]);
+
         return redirect('/login');
     }
 }

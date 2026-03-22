@@ -73,6 +73,6 @@ class GoogleController extends Controller
 
         Auth::guard('viewer')->login($viewer, true);
 
-        return redirect('/');
+        return redirect(session()->pull('url.intended', '/'));
     }
 }
