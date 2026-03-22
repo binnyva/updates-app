@@ -103,9 +103,10 @@ class UpdateController extends Controller
 
         $validated = $request->validate([
             'video_view_time' => 'required|numeric|min:0',
+            'finished' => 'boolean',
         ]);
 
-        VideoView::updateOrCreate(
+        $view = VideoView::updateOrCreate(
             [
                 'video_id' => $video->id,
                 'viewer_id' => $this->auth->currentViewer()->id,
@@ -114,6 +115,10 @@ class UpdateController extends Controller
                 'video_view_time' => $validated['video_view_time'],
             ]
         );
+
+        if (!empty($validated['finished']) && $view->finished_watch_at === null) {
+            $view->update(['finished_watch_at' => now()]);
+        }
 
         return response()->json(['ok' => true]);
     }

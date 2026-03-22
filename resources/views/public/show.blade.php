@@ -18,7 +18,8 @@
                        controls
                        @pause="onPause"
                        @play="onPlay"
-                       @timeupdate="onTimeUpdate">
+                       @timeupdate="onTimeUpdate"
+                       @ended="onEnded">
                     <source src="{{ url('/video/' . $video->id . '/stream') }}" type="video/mp4">
                     @if($video->subtitles)
                         <track src="{{ url('/video/' . $video->id . '/subtitles') }}" kind="subtitles" srclang="en" label="English" default
@@ -106,6 +107,17 @@
                     this.isPaused = false;
                     this.startTracking();
                 },
+                onEnded() {
+                    this.isPaused = true;
+                    fetch('{{ url('/update/' . $video->id . '/view') }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        },
+                        body: JSON.stringify({ video_view_time: this.$refs.videoEl.currentTime, finished: true }),
+                    });
+                },
                 onTimeUpdate() {
                     this.currentTime = this.$refs.videoEl.currentTime;
                 },
@@ -129,7 +141,7 @@
                             this.trackInterval = null;
                             return;
                         }
-                        fetch('/update/{{ $video->id }}/view', {
+                        fetch('{{ url('/update/' . $video->id . '/view') }}', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -137,7 +149,7 @@
                             },
                             body: JSON.stringify({ video_view_time: this.$refs.videoEl.currentTime }),
                         });
-                    }, 30000); // Every 30 seconds
+                    }, 5000); // Every 5 seconds
                 },
             };
         }

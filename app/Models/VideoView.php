@@ -11,10 +11,12 @@ class VideoView extends Model
         'video_id',
         'viewer_id',
         'video_view_time',
+        'finished_watch_at',
     ];
 
     protected $casts = [
         'video_view_time' => 'float',
+        'finished_watch_at' => 'datetime',
     ];
 
     public function video(): BelongsTo
