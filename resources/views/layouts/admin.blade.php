@@ -24,7 +24,7 @@
                 <a href="{{ url('/adm/videos') }}" class="block px-4 py-2 text-sm hover:bg-gray-700 {{ request()->is('adm/videos*') ? 'bg-gray-700' : '' }}">Videos</a>
             </nav>
             <div class="absolute bottom-0 w-56 p-4 border-t border-gray-700">
-                <p class="text-sm text-gray-300">{{ $currentUser->name ?? '' }}</p>
+                <p class="text-sm text-gray-300">{{ $currentUser ? explode(' ', $currentUser->name)[0] : '' }}</p>
                 <div class="flex gap-3 mt-2">
                     <a href="{{ url('/') }}" class="text-xs text-gray-400 hover:text-white">View Site</a>
                     <form method="POST" action="{{ url('/logout') }}" class="inline">

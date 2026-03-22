@@ -14,13 +14,13 @@
             <div class="flex items-center gap-4">
                 @if($currentUser)
                     <a href="{{ url('/adm') }}" class="text-sm text-gray-600 hover:text-gray-800">Admin</a>
-                    <span class="text-sm text-gray-500">{{ $currentUser->name }}</span>
+                    <span class="text-sm text-gray-500">{{ explode(' ', $currentUser->name)[0] }}</span>
                     <form method="POST" action="{{ url('/logout') }}" class="inline">
                         @csrf
                         <button type="submit" class="text-sm text-red-600 hover:text-red-800">Logout</button>
                     </form>
                 @elseif($currentViewer)
-                    <span class="text-sm text-gray-500">{{ $currentViewer->name }}</span>
+                    <span class="text-sm text-gray-500">{{ explode(' ', $currentViewer->name)[0] }}</span>
                     <form method="POST" action="{{ url('/logout') }}" class="inline">
                         @csrf
                         <button type="submit" class="text-sm text-red-600 hover:text-red-800">Logout</button>
