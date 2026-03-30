@@ -98,6 +98,18 @@ class VideoController extends Controller
         return response()->json($availableFiles);
     }
 
+    public function stats(Video $video)
+    {
+        if ($video->user_id !== $this->currentUser()->id) {
+            abort(404);
+        }
+
+        $viewers = $this->currentUser()->viewers;
+        $viewerIdsSeen = $video->videoViews()->pluck('viewer_id')->toArray();
+
+        return view('admin.videos.stats', compact('video', 'viewers', 'viewerIdsSeen'));
+    }
+
     public function edit(Video $video)
     {
         if ($video->user_id !== $this->currentUser()->id) {

@@ -17,6 +17,7 @@
                         <th class="px-4 py-3 text-left font-medium text-gray-500">Period</th>
                         <th class="px-4 py-3 text-left font-medium text-gray-500">Level</th>
                         <th class="px-4 py-3 text-left font-medium text-gray-500">Video</th>
+                        <th class="px-4 py-3 text-left font-medium text-gray-500">Stats</th>
                         <th class="px-4 py-3 text-right font-medium text-gray-500">Actions</th>
                     </tr>
                 </thead>
@@ -31,6 +32,9 @@
                                 </span>
                             </td>
                             <td class="px-4 py-3 text-gray-500">{{ $video->video_url ? 'Uploaded' : 'Pending' }}</td>
+                            <td class="px-4 py-3">
+                                <a href="{{ url('/adm/videos/' . $video->id . '/stats') }}" class="text-blue-600 hover:underline">View Stats</a>
+                            </td>
                             <td class="px-4 py-3 text-right">
                                 <a href="{{ url('/adm/videos/' . $video->id . '/edit') }}" class="text-blue-600 hover:underline mr-3">Edit</a>
                                 <form method="POST" action="{{ url('/adm/videos/' . $video->id) }}" class="inline">

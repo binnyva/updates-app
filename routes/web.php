@@ -44,5 +44,6 @@ Route::prefix('adm')->middleware(['auth.user'])->group(function () {
 
     Route::resource('viewers', ViewerController::class);
     Route::get('videos/server-files', [AdminVideoController::class, 'serverFiles']);
+    Route::get('videos/{video}/stats', [AdminVideoController::class, 'stats']);
     Route::resource('videos', AdminVideoController::class);
 });
