@@ -33,7 +33,7 @@
                             </td>
                             <td class="px-4 py-3 text-gray-500">{{ $video->video_url ? 'Uploaded' : 'Pending' }}</td>
                             <td class="px-4 py-3">
-                                <a href="{{ url('/adm/videos/' . $video->id . '/stats') }}" class="text-blue-600 hover:underline">View Stats</a>
+                                <a href="{{ url('/adm/videos/' . $video->id . '/stats') }}" class="text-blue-600 hover:underline">{{ $video->distinct_viewer_views_count }} / {{ $video->accessible_viewer_count }}</a>
                             </td>
                             <td class="px-4 py-3 text-right">
                                 <a href="{{ url('/adm/videos/' . $video->id . '/edit') }}" class="text-blue-600 hover:underline mr-3">Edit</a>

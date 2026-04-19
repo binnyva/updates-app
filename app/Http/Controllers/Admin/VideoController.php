@@ -7,6 +7,7 @@ use App\Jobs\DownloadVideoJob;
 use App\Models\Video;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class VideoController extends Controller
@@ -18,7 +19,23 @@ class VideoController extends Controller
 
     public function index()
     {
-        $videos = $this->currentUser()->videos()->orderBy('created_at', 'desc')->paginate(20);
+        $user = $this->currentUser();
+        $totalViewerCount = $user->viewers()->count();
+        $fullViewerCount = $user->viewers()->where('user_viewer.level', 'full')->count();
+
+        $videos = $user->videos()
+            ->withCount([
+                'videoViews as distinct_viewer_views_count' => fn ($query) => $query->select(DB::raw('count(distinct viewer_id)')),
+            ])
+            ->orderBy('created_at', 'desc')
+            ->paginate(20);
+
+        $videos->getCollection()->transform(function ($video) use ($fullViewerCount, $totalViewerCount) {
+            $video->accessible_viewer_count = $video->level === 'full' ? $fullViewerCount : $totalViewerCount;
+
+            return $video;
+        });
+
         return view('admin.videos.index', compact('videos'));
     }
 
@@ -104,8 +121,15 @@ class VideoController extends Controller
             abort(404);
         }
 
-        $viewers = $this->currentUser()->viewers;
-        $viewerIdsSeen = $video->videoViews()->pluck('viewer_id')->toArray();
+        $viewers = $this->currentUser()
+            ->viewers()
+            ->when($video->level === 'full', fn ($query) => $query->where('user_viewer.level', 'full'))
+            ->get();
+
+        $viewerIdsSeen = $video->videoViews()
+            ->whereIn('viewer_id', $viewers->pluck('id'))
+            ->pluck('viewer_id')
+            ->toArray();
 
         return view('admin.videos.stats', compact('video', 'viewers', 'viewerIdsSeen'));
     }
